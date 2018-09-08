@@ -67,27 +67,88 @@
     function addStatusLine(text) {
       document.getElementById("status").innerHTML = text + "<br/><br/>" + document.getElementById("status").innerHTML;
     }
+    
     function getBalance() {
       addStatusLine("");
       addStatusLine("calling getBalance()");
       // TODO: Call getBalance Smart Contract
+
+      SimpleContract.getBalance(function(error, result) {
+        addStatusLine("Current Balance = " + result);
+        document.getElementById('currentBalance').innerText = result
+      })
     }
+
     function setBalance() {
       // TODO: Call setBalance Smart Contract
+      const newBalance = document.getElementById('newBalance').value
+
+      SimpleContract.SetBalance(newBalance, function(error, result) {
+        if (error) {
+          return
+        }
+
+        addStatusLine("");
+        addStatusLine("calling SetBalance(" + newBalance + ")");
+
+        const txHash = result
+        addStatusLine(`txHash => <a target="_blank" href="https://kovan.etherscan.io/tx/${txHash}">Link</a>`);
+      })
     }
+
     // Initializing
     if (typeof web3 !== 'undefined') {
       web3 = new Web3(web3.currentProvider);
     }
+
     // Get default address
     web3.eth.defaultAccount = web3.eth.accounts[0];
+
     // TODO: Replace your SimpleContract abi here
-    var abi = [];
+    var abi = [
+      {
+        "constant": false,
+        "inputs": [
+          {
+            "name": "newBalance",
+            "type": "uint256"
+          }
+        ],
+        "name": "SetBalance",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "constant": true,
+        "inputs": [],
+        "name": "getBalance",
+        "outputs": [
+          {
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ];
+
     // TODO: Replace your SimpleContract contract address here
-    var contractAddress = '';
+    var contractAddress = '0x77A408AE04008bEcE9c27C8C1C7843E9686e3c2e';
+
     // Create an interface to SimpleContract on TomoChain
     var SimpleContractContract = web3.eth.contract(abi);
     var SimpleContract = SimpleContractContract.at(contractAddress);
+
     // Get Balance on the first load
     getBalance();
   </script>
